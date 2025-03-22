@@ -1,5 +1,5 @@
 from texts import ribber
-from vocabs import stitch_grammar, row_grammar
+from initial_n_utils.vocabs import stitch_grammar, row_grammar
 
 
 class Ribber:

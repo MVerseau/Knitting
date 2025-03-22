@@ -1,4 +1,4 @@
-from ribber import Ribber
+from Stitches.ribber import Ribber
 from texts import ribber_to_knit
 import os
 import pandas as pd
