@@ -27,7 +27,7 @@ def get_design() -> pd.DataFrame:
 
 def get_measurements():  # зачем DataFrames?
     name = input('Имя: ')
-    garment_measurements = find_measurements(name.title() + '.csv')
+    garment_measurements = find_measurements(name.title() + '.csv')  # проверить, достаточно ли мерок в файле
     garment_adjustments = {}
 
     if garment_measurements is None:
@@ -36,7 +36,7 @@ def get_measurements():  # зачем DataFrames?
             garment_measurements[k] = [check_float(input(f'{measures_vocab[k]}: '))]
             if k in Garment.adjustments:
                 garment_adjustments[k] = [check_float(input(f'{adjustments_vocab[k]}: '))]
-        # garment_measurements = garment_measurements.join(garment_adjustments)
+
         garment_measurements = pd.DataFrame.from_dict(garment_measurements, orient='index').rename(
             columns={0: 'measures'})
     else:
@@ -53,19 +53,24 @@ def get_measurements():  # зачем DataFrames?
 
 def set_stitches_size() -> pd.DataFrame:
     print("\nДАННЫЕ ПРОБНИКА")
-    stitches = int(input("Количество петель: "))
-    rows = int(input("Количество рядов: "))
-    sm_in_stitches = 0
-    sm_in_rows = 0
-    a = 0
-    while a < 3:
-        sm_in_stitches += float(input(f'См в ширину{stitches_size_approach[a]}: '))
-        sm_in_rows += float(input("См в длину: "))
-        a += 1
-        if input('Следующее измерение? (Y/N) ') not in 'ylд':
-            break
-    stitches_size = {'sts in sm': [stitches / (sm_in_stitches / a)], 'rows in sm': [rows / (sm_in_rows / a)]}
-    stitches_size = pd.DataFrame.from_dict(stitches_size)
+    stitches_size = pd.DataFrame(columns=['sts in sm', 'rows in sm'])
+    print(stitches_size)
+    for st in Garment.main_stitch:
+        stitches = int(input("Количество петель: "))
+        rows = int(input("Количество рядов: "))
+        sm_in_stitches = 0
+        sm_in_rows = 0
+        a = 0
+        while a < 3:
+            sm_in_stitches += float(input(f'См в ширину{stitches_size_approach[a]}: '))
+            sm_in_rows += float(input("См в длину: "))
+            a += 1
+            if input('Следующее измерение? (Y/N) ') not in 'ylд':
+                break
+        s_size = {'sts in sm': [stitches / (sm_in_stitches / a)], 'rows in sm': [rows / (sm_in_rows / a)]}
+        # print(pd.DataFrame.from_dict(s_size).rename(index={0: st}))
+        stitches_size = pd.concat([stitches_size, pd.DataFrame.from_dict(s_size).rename(index={0: st})])
+
     return stitches_size
 
 

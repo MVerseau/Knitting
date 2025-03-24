@@ -13,10 +13,16 @@ def main():
     # print(stitches_size)
     # print(f'{measurements}')
     # print(garment_design)
-    person = Owner(name, measurements)
+    # person = Owner(name, measurements) #здесь проверить все необходимые мерки?
     # print(person.measurements)
-    tank_top=Garment(name, person, garment_adjustments, garment_design, stitches_size) #TODO: to continue from here
+    # print(garment_adjustments.loc['waist']['adjustments'])
+    tank_top = Garment(name, measurements, garment_adjustments, garment_design,
+                       stitches_size)
+    print(tank_top.stitches_size)
+    # print(type(person.waist))
 
+
+# TODO: to continue from here
 
 if __name__ == '__main__':
     main()
