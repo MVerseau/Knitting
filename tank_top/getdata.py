@@ -54,7 +54,7 @@ def get_measurements():  # зачем DataFrames?
 def set_stitches_size() -> pd.DataFrame:
     print("\nДАННЫЕ ПРОБНИКА")
     stitches_size = pd.DataFrame(columns=['sts in sm', 'rows in sm'])
-    print(stitches_size)
+    # print(stitches_size)
     for st in Garment.main_stitch:
         stitches = int(input("Количество петель: "))
         rows = int(input("Количество рядов: "))
