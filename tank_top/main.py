@@ -1,3 +1,5 @@
+import datetime
+
 from Stitches.ribber import Ribber
 from texts import ribber_to_knit
 from getdata import get_measurements, get_stitches_size
@@ -19,6 +21,7 @@ def main():
     tank_top = Garment(name, measurements, garment_adjustments, garment_design,
                        stitches_size)
     print(tank_top.stitches_size)
+    tank_top.measurements_adjustments.to_csv(f'{tank_top.name} tank_top.{datetime.date.today()}.csv', sep=';', index=True, encoding='utf-8')
     # print(type(person.waist))
 
 

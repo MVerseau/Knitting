@@ -11,8 +11,7 @@ class Garment:
         self.measurements_adjustments = pd.concat(
             [garment_measurements.join(garment_adjustments), garment_design]).rename(columns={0: 'design'})
         self.stitches_size = stitches_size
-        # for a in garment_adjustments.index:
-        #     setattr(self, a + '_adj', garment_adjustments.loc[a]['adjustments'])
+
 
     def rows_sts(self, number, row_or_sts, stitch=0):
         if isinstance(stitch, str):
