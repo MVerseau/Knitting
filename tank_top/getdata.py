@@ -56,6 +56,7 @@ def set_stitches_size() -> pd.DataFrame:
     stitches_size = pd.DataFrame(columns=['sts in sm', 'rows in sm'])
     # print(stitches_size)
     for st in Garment.main_stitch:
+        tension = input('Плотность (для 2 фонтур указать черзе "/": ')
         stitches = int(input("Количество петель: "))
         rows = int(input("Количество рядов: "))
         sm_in_stitches = 0
@@ -67,7 +68,8 @@ def set_stitches_size() -> pd.DataFrame:
             a += 1
             if input('Следующее измерение? (Y/N) ') not in 'ylд':
                 break
-        s_size = {'sts in sm': [stitches / (sm_in_stitches / a)], 'rows in sm': [rows / (sm_in_rows / a)]}
+        s_size = {'tension': [tension], 'sts in sm': [stitches / (sm_in_stitches / a)],
+                  'rows in sm': [rows / (sm_in_rows / a)]}
         # print(pd.DataFrame.from_dict(s_size).rename(index={0: st}))
         stitches_size = pd.concat([stitches_size, pd.DataFrame.from_dict(s_size).rename(index={0: st})])
 
