@@ -1,14 +1,16 @@
 from initial_n_utils.vocabs import measures_vocab, stitches_size_approach, adjustments_vocab
 from tank_top_person import Owner
-from garment import Garment
+from tanktop import TankTop
 import pandas as pd
 from initial_n_utils.utils import check_float
 
 
 def find_measurements(name) -> pd.DataFrame or None:
+
     try:
-        print(f'{name} in the directory')
+
         garment_measurements = pd.read_csv(name, sep=';', index_col=0)
+        print(f'{name} in the directory')
         return garment_measurements
     except:
         print(f'File {name} is empty')
@@ -17,16 +19,28 @@ def find_measurements(name) -> pd.DataFrame or None:
 
 
 def get_design() -> pd.DataFrame:
+    new_finishing = input('Заменить отделку на резинку (сейчас подгиб)? ')
+    if new_finishing.lower() in 'lfда':
+        finishing = 'ribber'
+    else:
+        finishing = 'hem'
+
     garment_design = {'armscye_lowing': None, 'back_neck_plain': None, 'front_neck_plain': None,
-                      'back_neck_lowing': None, 'front_neck_lowing': None}
+                      'back_neck_lowing': None, 'front_neck_lowing': None, finishing: None}
     print('\nМОДЕЛИРОВАНИЕ')
     for k, v in garment_design.items():
         garment_design[k] = [check_float((input(f'{measures_vocab[k]}: ')))]
+
+    # print(garment_design)
     return pd.DataFrame.from_dict(garment_design, orient='index')
 
 
 def get_measurements():  # зачем DataFrames?
     name = input('Имя: ')
+    # try:
+    #     measures = pd.read_csv(f'{name.title()} tank_top)
+    #
+    #     re.match(f'({name.title()} tank_top\.*)', os.).
     garment_measurements = find_measurements(name.title() + '.csv')  # проверить, достаточно ли мерок в файле
     garment_adjustments = {}
 
@@ -34,13 +48,13 @@ def get_measurements():  # зачем DataFrames?
         garment_measurements = {}
         for k in Owner.measurements:
             garment_measurements[k] = [check_float(input(f'{measures_vocab[k]}: '))]
-            if k in Garment.adjustments:
+            if k in TankTop.adjustments:
                 garment_adjustments[k] = [check_float(input(f'{adjustments_vocab[k]}: '))]
 
         garment_measurements = pd.DataFrame.from_dict(garment_measurements, orient='index').rename(
             columns={0: 'measures'})
     else:
-        for k in Garment.adjustments:
+        for k in TankTop.adjustments:
             garment_adjustments[k] = [check_float(input(f'{adjustments_vocab[k]}: '))]
     garment_adjustments = pd.DataFrame.from_dict(garment_adjustments, orient='index').rename(
         columns={0: 'adjustments'})
@@ -55,7 +69,7 @@ def set_stitches_size() -> pd.DataFrame:
     print("\nДАННЫЕ ПРОБНИКА")
     stitches_size = pd.DataFrame(columns=['sts in sm', 'rows in sm'])
     # print(stitches_size)
-    for st in Garment.main_stitch:
+    for st in TankTop.main_stitch:
         tension = input('Плотность (для 2 фонтур указать черзе "/": ')
         stitches = int(input("Количество петель: "))
         rows = int(input("Количество рядов: "))
@@ -64,13 +78,13 @@ def set_stitches_size() -> pd.DataFrame:
         a = 0
         while a < 3:
             sm_in_stitches += float(input(f'См в ширину{stitches_size_approach[a]}: '))
-            sm_in_rows += float(input("См в длину: "))
+            sm_in_rows += float(input(f"См в длину{stitches_size_approach[a]}: "))
             a += 1
             if input('Следующее измерение? (Y/N) ') not in 'ylд':
                 break
         s_size = {'tension': [tension], 'sts in sm': [stitches / (sm_in_stitches / a)],
                   'rows in sm': [rows / (sm_in_rows / a)]}
-        # print(pd.DataFrame.from_dict(s_size).rename(index={0: st}))
+
         stitches_size = pd.concat([stitches_size, pd.DataFrame.from_dict(s_size).rename(index={0: st})])
 
     return stitches_size
@@ -82,5 +96,5 @@ def get_stitches_size(name):
     except:
         print('Петельной пробы нет')
         stitches_size = set_stitches_size()
-        stitches_size.to_csv(name + ' stitches_size.csv')
+        stitches_size.to_csv(name + ' stitches_size.csv', sep=';', encoding='utf-8')
     return stitches_size
