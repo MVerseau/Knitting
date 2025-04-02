@@ -6,7 +6,6 @@ from initial_n_utils.utils import check_float
 
 
 def find_measurements(name) -> pd.DataFrame or None:
-
     try:
 
         garment_measurements = pd.read_csv(name, sep=';', index_col=0)
@@ -18,7 +17,7 @@ def find_measurements(name) -> pd.DataFrame or None:
         return
 
 
-def get_design() -> pd.DataFrame:
+def get_design(size) -> pd.DataFrame:
     new_finishing = input('Заменить отделку на резинку (сейчас подгиб)? ')
     if new_finishing.lower() in 'lfда':
         finishing = 'ribber'
@@ -31,16 +30,26 @@ def get_design() -> pd.DataFrame:
     for k, v in garment_design.items():
         garment_design[k] = [check_float((input(f'{measures_vocab[k]}: ')))]
 
+    fit = input('Приталенный силуэт? (да/нет): ')
+    if fit in 'нетytn':
+        garment_design['fitted'] = [0]
+    else:
+        garment_design['fitted'] = [1]
+
+    if size / 2 >= 54:
+        garment_design['dart'] = [1]
+    else:
+        dart = input('Делать нагрудную вытачку? (да/нет): ')
+        if dart in 'ytnнет':
+            garment_design['dart'] = [0]
+        else:
+            garment_design['dart'] = [1]
     # print(garment_design)
     return pd.DataFrame.from_dict(garment_design, orient='index')
 
 
-def get_measurements():  # зачем DataFrames?
-    name = input('Имя: ')
-    # try:
-    #     measures = pd.read_csv(f'{name.title()} tank_top)
-    #
-    #     re.match(f'({name.title()} tank_top\.*)', os.).
+def get_measurements(name):  # зачем DataFrames?
+
     garment_measurements = find_measurements(name.title() + '.csv')  # проверить, достаточно ли мерок в файле
     garment_adjustments = {}
 
@@ -60,9 +69,9 @@ def get_measurements():  # зачем DataFrames?
         columns={0: 'adjustments'})
     garment_measurements.to_csv(name.title() + '.csv', sep=';', index=True, encoding='utf-8')
 
-    garment_design = get_design()
+    garment_design = get_design(garment_measurements.loc['bust'].item())
 
-    return name, garment_measurements, garment_adjustments, garment_design
+    return garment_measurements, garment_adjustments, garment_design
 
 
 def set_stitches_size() -> pd.DataFrame:

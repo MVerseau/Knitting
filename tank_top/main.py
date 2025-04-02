@@ -1,4 +1,9 @@
 import datetime
+import os
+import re
+
+import pandas as pd
+
 #
 # from Stitches.ribber import Ribber
 # from texts import ribber_to_knit
@@ -8,25 +13,28 @@ from tanktop import TankTop
 
 
 def main():
+    name = input('Имя: ')
+    measures=None
+    file_exists=None
+    for file in os.listdir(os.getcwd()):
+        if f'{name.title()} tank_top' in file:
+            file_exists=True
+            measures = [pd.read_csv(file,sep=';', index_col=0)] #->pd.DataFrame
+            break
+    if measures is None:
+        measures = get_measurements(name) #->tuple
 
-    name, measurements, garment_adjustments, garment_design = get_measurements()  # DataFrame or str.
-    # print(measurements)
-    # print(garment_adjustments)
-    # print(garment_design)
-    stitches_size = get_stitches_size(name)  # DaraFrame or str
-    # print(Ribber.two_through_one(5, 15))
-    # print(ribber_to_knit.format(20))
-    # print(stitches_size)
-    # print(f'{measurements}')
-    # print(garment_design)
-    # person = Owner(name, measurements) #здесь проверить все необходимые мерки?
-    # print(person.measurements)
-    # print(garment_adjustments.loc['waist']['adjustments'])
-    tank_top = TankTop(name, measurements, garment_adjustments, garment_design,
-                       stitches_size)
-    print(tank_top.back_main_set())
-    tank_top.measurements_adjustments.to_csv(f'{tank_top.name} tank_top.{datetime.date.today()}.csv', sep=';', index=True, encoding='utf-8')
-    # print(type(person.waist))
+    stitches_size = get_stitches_size(name)
+    # print(len(measures))
+    tank_top = TankTop(name, stitches_size, measures)
+    # print(tank_top.measurements_adjustments)
+    if not file_exists:
+        tank_top.measurements_adjustments.to_csv(f'{tank_top.name.title()} tank_top.{datetime.date.today()}.csv', sep=';', index=True, encoding='utf-8')
+    # print(tank_top.back.main_measures_set)
+    # print(tank_top.back.fitted)
+    # print(tank_top.back.side_line.T)
+    # print(f'{tank_top.back.bottom=}')
+    # print(f'{tank_top.back.armhole=}')
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import pandas as pd
 from initial_n_utils.vocabs import sts_or_row, convert_to_sts
+from initial_n_utils.utils import curved_line, concave_line
 from Stitches.technique import hem_func
 
 
@@ -11,84 +12,263 @@ class TankTop:
     adjustments = ['waist', 'hips', 'bust', 'neck']
     technique = ['ribber', 'hem']
 
-    def __init__(self, name, garment_measurements, garment_adjustments, garment_design,
-                 stitches_size):  # TODO: В планах: передавать экземпляр Owner (person)
+    def __init__(self, name, stitches_size, measures):  # TODO: В планах: передавать экземпляр Owner (person)
         self.name = name
-        self.measurements_adjustments = self.mes_and_adj_preparation(garment_measurements, garment_adjustments,
-                                                                     garment_design)
+        self.measurements_adjustments = self.mes_and_adj_preparation(measures) if len(measures) > 1 else measures[0]
         self.stitches_size = stitches_size
+        self.back = Back(self.measurements_adjustments, self.stitches_size)
 
-    def rows_sts(self, number, row_or_sts, stitch=0):
+    @staticmethod
+    def rows_sts(number, row_or_sts, stitches_size, stitch=0):
         '''Конвертирует см в количество рядов/петель
         number: мерка в см
         row_or_sts: row или stitch. Передается в словарь sts_or_row, который содержит название столбцов в pandas.DataFrame self.stitches_size
         stitch: строка в pandas.DataFrame self.stitches_size (актуально, если self.stitches_size содержит более одного вида переплетения'''
 
         if isinstance(stitch, str):
-            stitch = self.stitches_size[stitch].index
-        return number * self.stitches_size.iloc[stitch][sts_or_row[row_or_sts]]
+            stitch = stitches_size[stitch].index
+        # print(stitches_size)
+        return number * stitches_size.iloc[stitch][sts_or_row[row_or_sts]]
 
-    def mes_and_adj_preparation(self, garment_measurements, garment_adjustments, garment_design):
+    def mes_and_adj_preparation(self, args):
         '''Сводит все мерки и моделирование в один DataFrame, подсчитывает суммы по строкам'''
-
+        # print(f'{args=}')
+        garment_measurements, garment_adjustments, garment_design = args
         mes_adj = pd.concat([garment_measurements.join(garment_adjustments), garment_design]).rename(
             columns={0: 'design'})
         mes_adj['sum'] = mes_adj.sum(axis=1)
+        # print(f'{mes_adj=}')
         return mes_adj
 
     @staticmethod
     def round_to_base(number, base):
-        return int(base * round(number / base))
-
-    def back_main_set(self):
-        '''Основные мерки для спинки'''
-        back_meas = {'TBL': [self.measurements_adjustments.loc['TBL']['sum'].item()],
-                     'back_length_till_waist': [
-                         self.measurements_adjustments.loc['back_length_till_waist']['sum'].item()],
-                     'waist': [self.measurements_adjustments.loc['waist']['sum'].item() / 2],
-                     'hips': [self.measurements_adjustments.loc['hips']['sum'].item() / 2],
-                     'bust': [self.measurements_adjustments.loc['bust']['sum'].item() / 2],
-                     'neck_depth': [self.measurements_adjustments.loc['back_neck_depth']['sum'].item() +
-                                    self.measurements_adjustments.loc['back_neck_lowing']['sum'].item()],
-                     'neck_width': [self.measurements_adjustments.loc['neck']['sum'].item()],
-                     'shoulder_width': [self.measurements_adjustments.loc['shoulder_width']['sum'].item()],
-                     'plain_part': [self.measurements_adjustments.loc['back_neck_plain']['sum'].item()],
-                     'armhole_height': [self.measurements_adjustments.loc['bust']['measures'].item() / 6 + 5 + 1.5 +
-                                        self.measurements_adjustments.loc['armscye_lowing']['sum'].item()]}
-
-        const = self.measurements_adjustments.loc['ribber'][
-            'sum'] if 'ribber' in self.measurements_adjustments.index else 0
-        back_meas['armhole_depth'] = [
-            max(back_meas['waist'][0], back_meas['hips'][0], back_meas['bust'][0]) - back_meas['neck_width'][0] - (
-                    (back_meas['shoulder_width'][0] - const) * 2) / 2]
-        back_meas['armhole_starts_at'] = [
-            back_meas['TBL'][0] - back_meas['armhole_height'][0] + back_meas['neck_depth'][0]]
-        if 'ribber' in self.measurements_adjustments.index:
-            back_meas['ribber'] = [self.measurements_adjustments.loc['ribber']['sum'].item()]
-            back_meas['armhole_starts_at'] = [back_meas['armhole_starts_at'][0] - back_meas['ribber'][0]]
-        else:
-            back_meas['hem'] = [self.measurements_adjustments.loc['hem']['sum'].item()]
-            back_meas['armhole_starts_at'] = [back_meas['armhole_starts_at'][0] - back_meas['hem'][0]]
-        back = pd.DataFrame.from_dict(back_meas, orient='index', columns=['sm'])
-
-        app_units = OrderedDict()
-        units_to_knit = {}
-        for i in sorted(back.index):
-            app_units[i] = [self.rows_sts(back.loc[i]['sm'].item(), ['row', 'sts'][i in convert_to_sts])]
-            if i not in ['hem', 'ribber', 'armhole_starts_at']:
-                units_to_knit[i] = [int(self.round_to_base(app_units[i][0], 2))]
-            elif i in ['hem', 'ribber']:
-                units_to_knit[i] = [round(app_units[i][0])]
-            elif i == 'armhole_starts_at':
-                units_to_knit[i] = [round(app_units[i][0]) - (units_to_knit['armhole_height'][0] - math.floor(app_units['armhole_height'][0]))]
-
-        back = back.join(pd.DataFrame.from_dict(app_units, orient='index', columns=['app_units']))
-        back = back.join(pd.DataFrame.from_dict(units_to_knit, orient='index', columns=['units_to_knit']))
-
-        return back
+        return int(base * (round(number / base)))
 
     def front(self):
         pass
 
     def finishing(self):
         pass
+
+
+class Back:
+
+    def __init__(self, measures, stitches_size):
+        self.main_measures_set = self.back_main_set(measures, stitches_size)
+        self.fitted = self.waist()
+        self.side_line = self.side_line() if measures.loc['fitted']['sum'].item() < 1 else self.fitted
+        self.bottom = self.bottom(stitches_size)
+        self.armhole = self.armhole()
+
+    def back_main_set(self, measures, stitches_size):
+        '''Основные мерки для спинки'''
+
+        back_meas = {'TBL': [measures.loc['TBL']['sum'].item()],
+                     'back_length_till_waist': [
+                         measures.loc['back_length_till_waist']['sum'].item()],
+                     'waist': [measures.loc['waist']['sum'].item() / 2],
+                     'hips': [measures.loc['hips']['sum'].item() / 2],
+                     'bust': [measures.loc['bust']['sum'].item() / 2],
+
+                     'neck_depth': [measures.loc['back_neck_depth']['sum'].item() +
+                                    measures.loc['back_neck_lowing']['sum'].item()],
+                     'neck_width': [measures.loc['neck']['sum'].item()],
+                     'shoulder_width': [measures.loc['shoulder_width']['sum'].item()],
+                     'plain_part': [measures.loc['back_neck_plain']['sum'].item()],
+                     'armhole_height': [measures.loc['bust']['measures'].item() / 6 + 5 + 1.5 +
+                                        measures.loc['armscye_lowing']['sum'].item()]}
+
+        const = measures.loc['ribber'][
+            'sum'] if 'ribber' in measures.index else 0
+        back_meas['armhole_depth'] = [
+            max(back_meas['waist'][0], back_meas['hips'][0], back_meas['bust'][0]) - back_meas['neck_width'][0] - (
+                    (back_meas['shoulder_width'][0] - const) * 2) / 2]
+        back_meas['armhole_starts_at'] = [
+            back_meas['TBL'][0] - back_meas['armhole_height'][0] + back_meas['neck_depth'][0]]
+        back_meas['width'] = [max(back_meas['waist'][0], back_meas['hips'][0], back_meas['bust'][0])]
+        if 'ribber' in measures.index:
+            back_meas['ribber'] = [measures.loc['ribber']['sum'].item()]
+            back_meas['armhole_starts_at'] = [back_meas['armhole_starts_at'][0] - back_meas['ribber'][0]]
+        else:
+            back_meas['hem'] = [measures.loc['hem']['sum'].item()]
+            back_meas['armhole_starts_at'] = [back_meas['armhole_starts_at'][0] - back_meas['hem'][0]]
+        back = pd.DataFrame.from_dict(back_meas, orient='index', columns=['sm'])
+
+        app_units = OrderedDict()
+        units_to_knit = {}
+        for i in sorted(back.index):
+            if i not in ['fitted', 'dart']:
+                app_units[i] = [
+                    TankTop.rows_sts(back.loc[i]['sm'].item(), ['row', 'sts'][i in convert_to_sts], stitches_size)]
+                if i not in ['hem', 'ribber', 'armhole_starts_at']:
+                    units_to_knit[i] = [int(TankTop.round_to_base(app_units[i][0], 2))]
+                elif i in ['hem']:
+
+                    units_to_knit[i] = [round(app_units[i][0])]
+                elif i in ['ribber']:
+                    app_units[i] = [
+                        TankTop.rows_sts(back.loc[i]['sm'].item(), ['row', 'sts'][i in convert_to_sts], stitches_size,
+                                         stitch=i)]
+                    units_to_knit[i] = [round(app_units[i][0])]
+                elif i == 'armhole_starts_at':
+                    units_to_knit[i] = [round(app_units[i][0]) - (
+                            units_to_knit['armhole_height'][0] - math.floor(app_units['armhole_height'][0]))]
+
+        back = back.join(pd.DataFrame.from_dict(app_units, orient='index', columns=['app_units']))
+        back = back.join(pd.DataFrame.from_dict(units_to_knit, orient='index', columns=['units_to_knit']))
+        # print(back)
+        return back
+
+    def bottom(self, stitches_size):
+        sts_to_decrease = self.main_measures_set.loc['width']['units_to_knit'].item() // 4 + 1
+        length = int(TankTop.round_to_base(TankTop.rows_sts(1, 'row', stitches_size), 2) / 2)
+        sts_per_row = curved_line(sts_to_decrease, length)
+        return sts_per_row
+
+    def waist(self):
+
+        lower_length = int(min(round(self.main_measures_set.loc['back_length_till_waist']['units_to_knit'].item() / 2),
+                               self.main_measures_set.loc['TBL']['units_to_knit'].item() -
+                               self.main_measures_set.loc['hem']['units_to_knit'].item() -
+                               self.main_measures_set.loc['back_length_till_waist']['units_to_knit'].item()))
+
+        direct_part = 0
+        if lower_length == self.main_measures_set.loc['back_length_till_waist']['units_to_knit'].item() / 2:
+            direct_part = int(
+                self.main_measures_set.loc['TBL']['units_to_knit'].item() - self.main_measures_set.loc['hem'][
+                    'units_to_knit'].item() - self.main_measures_set.loc['back_length_till_waist'][
+                    'units_to_knit'].item() - lower_length)
+        upper_length = int(self.main_measures_set.loc['armhole_starts_at'][
+                               'units_to_knit'].item() - lower_length - direct_part)
+
+        lower_sts_to_decrease = int((self.main_measures_set.loc['hips']['units_to_knit'].item() -
+                                     self.main_measures_set.loc['waist']['units_to_knit'].item()) / 2)
+
+        if lower_sts_to_decrease != 0:
+            lower_decrease_every_rows = int(
+                lower_length // lower_sts_to_decrease)
+            lower_rows_remains = lower_length % lower_sts_to_decrease
+
+        else:
+            lower_decrease_every_rows = 0
+            lower_rows_remains = 0
+
+        upper_sts_to_decrease = int((self.main_measures_set.loc['waist']['units_to_knit'].item() -
+                                     self.main_measures_set.loc['bust']['units_to_knit'].item()) / 2)
+
+        if upper_sts_to_decrease != 0:
+            upper_decrease_every_rows = int(upper_length // upper_sts_to_decrease)
+            upper_rows_remains = upper_length % upper_sts_to_decrease
+        else:
+            upper_decrease_every_rows = 0
+            upper_rows_remains = 0
+        waist_line = pd.DataFrame.from_dict(
+            {'lower': [direct_part, lower_length, lower_sts_to_decrease, lower_decrease_every_rows, lower_rows_remains],
+             'upper': [None, upper_length, upper_sts_to_decrease, upper_decrease_every_rows, upper_rows_remains]},
+            orient='index', columns=['direct_part', 'length', 'sts_to_decrease', 'decrease_every_row', 'row_remainder'])
+        return waist_line
+
+    def side_line(self):  # если не приталено
+        lenght = int(self.fitted['length'].sum())
+        sts_to_decrease = int((self.main_measures_set.loc['hips']['units_to_knit'] -
+                               self.main_measures_set.loc['bust']['units_to_knit']) / 2)
+        decrease_every_row = int(lenght // sts_to_decrease)
+        row_remainder = int(lenght % sts_to_decrease)
+        side_line = pd.DataFrame.from_dict({'not_fitted': [self.fitted.loc['lower']['direct_part'], lenght,
+                                                           sts_to_decrease, decrease_every_row, row_remainder]},
+                                           'index', columns=self.fitted.columns)
+
+        return side_line
+
+    def armhole(self):
+        one_fourth = self.main_measures_set.loc['armhole_depth']['units_to_knit'].item() // 4
+
+        # PART 1
+        one_time_decrease = int(one_fourth + self.main_measures_set.loc['armhole_depth']['units_to_knit'].item() % 4)
+
+        # PART 2
+        step = 2
+        part2 = curved_line(one_fourth, int(one_fourth // step))
+
+
+        # PART 3
+        step = 1
+        part3 = concave_line(one_fourth, int(one_fourth // step))
+
+        return one_time_decrease, part2, part3
+
+# class Front:
+#
+#     def __init__(self, measures, stitches_size):
+#         self.main_measures_set = self.front_main_set(measures, stitches_size)
+#         self.dart = self.dart() if measures.loc['dart']['sum'].item() == 1 else None
+#         self.fitted = self.waist() if measures.loc['fitted']['sum'].item() == 1 else None
+#
+#     def front_main_set(self, measures, stitches_size):
+#         '''Основные мерки для спинки'''
+#         back_meas = {'TBL': [measures.loc['TBL']['sum'].item()],
+#                      'back_length_till_waist': [
+#                          measures.loc['back_length_till_waist']['sum'].item()],
+#                      'waist': [measures.loc['waist']['sum'].item() / 2],
+#                      'hips': [measures.loc['hips']['sum'].item() / 2],
+#                      'bust': [measures.loc['bust']['sum'].item() / 2],
+#                      'neck_depth': [measures.loc['back_neck_depth']['sum'].item() +
+#                                     measures.loc['back_neck_lowing']['sum'].item()],
+#                      'neck_width': [measures.loc['neck']['sum'].item()],
+#                      'shoulder_width': [measures.loc['shoulder_width']['sum'].item()],
+#                      'plain_part': [measures.loc['back_neck_plain']['sum'].item()],
+#                      # 'fitted': [measures.loc['fitted']['sum'].item()],
+#                      'armhole_height': [measures.loc['bust']['measures'].item() / 6 + 5 + 1.5 +
+#                                         measures.loc['armscye_lowing']['sum'].item()]}
+#
+#         const = measures.loc['ribber'][
+#             'sum'] if 'ribber' in measures.index else 0
+#         back_meas['armhole_depth'] = [
+#             max(back_meas['waist'][0], back_meas['hips'][0], back_meas['bust'][0]) - back_meas['neck_width'][0] - (
+#                     (back_meas['shoulder_width'][0] - const) * 2) / 2]
+#         back_meas['armhole_starts_at'] = [
+#             back_meas['TBL'][0] - back_meas['armhole_height'][0] + back_meas['neck_depth'][0]]
+#         if 'ribber' in measures.index:
+#             back_meas['ribber'] = [measures.loc['ribber']['sum'].item()]
+#             back_meas['armhole_starts_at'] = [back_meas['armhole_starts_at'][0] - back_meas['ribber'][0]]
+#         else:
+#             back_meas['hem'] = [measures.loc['hem']['sum'].item()]
+#             back_meas['armhole_starts_at'] = [back_meas['armhole_starts_at'][0] - back_meas['hem'][0]]
+#         back = pd.DataFrame.from_dict(back_meas, orient='index', columns=['sm'])
+#
+#         app_units = OrderedDict()
+#         units_to_knit = {}
+#         for i in sorted(back.index):
+#             if i not in ['fitted', 'dart']:
+#                 app_units[i] = [
+#                     TankTop.rows_sts(back.loc[i]['sm'].item(), ['row', 'sts'][i in convert_to_sts], stitches_size)]
+#                 if i not in ['hem', 'ribber', 'armhole_starts_at']:
+#                     units_to_knit[i] = [int(TankTop.round_to_base(app_units[i][0], 2))]
+#                 elif i in ['hem', 'ribber']:
+#                     units_to_knit[i] = [round(app_units[i][0])]
+#                 elif i == 'armhole_starts_at':
+#                     units_to_knit[i] = [round(app_units[i][0]) - (
+#                             units_to_knit['armhole_height'][0] - math.floor(app_units['armhole_height'][0]))]
+#
+#         back = back.join(pd.DataFrame.from_dict(app_units, orient='index', columns=['app_units']))
+#         back = back.join(pd.DataFrame.from_dict(units_to_knit, orient='index', columns=['units_to_knit']))
+#         # back['fitted']=pd.Series([self.measurements_adjustments.loc['fitted']])
+#         print(back)
+#         return back
+#
+#     def waist(self):
+#         # Вычисляем длину "юбки" (отрезка ниже талии). Считается, что расстояние Т-Б = Т-Г = длина верха до талии/2
+#         skirt_length = min(round(self.main_measures_set.loc['back_length_till_waist']['units_to_knit'].item() / 2),
+#                            self.main_measures_set.loc['TBL']['units_to_knit'].item() -
+#                            self.main_measures_set.loc['hem']['units_to_knit'].item() -
+#                            self.main_measures_set.loc['back_length_till_waist']['units_to_knit'].item())
+#         direct_part = 0
+#         if skirt_length < self.main_measures_set.loc['back_length_till_waist']['units_to_knit'].item() / 2:
+#             direct_part = self.main_measures_set.loc['TBL']['units_to_knit'].item() - self.main_measures_set.loc['hem'][
+#                 'units_to_knit'].item() - self.main_measures_set.loc['back_length_till_waist'][
+#                               'units_to_knit'].item() - skirt_length
+#
+#         return skirt_length, direct_part
+#
+#     def dart(self):
+#         pass
