@@ -59,30 +59,28 @@ class Back:
         self.side_line = self.side_line() if measures.loc['fitted']['sum'].item() < 1 else self.fitted
         self.bottom = self.bottom(stitches_size)
         self.armhole = self.armhole()
+        self.neck = self.neck()
 
     def back_main_set(self, measures, stitches_size):
         '''Основные мерки для спинки'''
-
+        const = measures.loc['ribber'][
+            'sum'] if 'ribber' in measures.index else 0
         back_meas = {'TBL': [measures.loc['TBL']['sum'].item()],
                      'back_length_till_waist': [
                          measures.loc['back_length_till_waist']['sum'].item()],
                      'waist': [measures.loc['waist']['sum'].item() / 2],
                      'hips': [measures.loc['hips']['sum'].item() / 2],
-                     'bust': [measures.loc['bust']['sum'].item() / 2],
+                     'bust': [(measures.loc['bust']['measures'].item()+measures.loc['bust']['adjustments'].item()/3) / 2],
 
                      'neck_depth': [measures.loc['back_neck_depth']['sum'].item() +
                                     measures.loc['back_neck_lowing']['sum'].item()],
-                     'neck_width': [measures.loc['neck']['sum'].item()],
-                     'shoulder_width': [measures.loc['shoulder_width']['sum'].item()],
+                     'neck_width': [measures.loc['neck']['measures'].item() / 3+measures.loc['neck']['adjustments'].item()*2+0.5],
+                     'shoulder_width': [measures.loc['shoulder_width']['sum'].item() - const],
                      'plain_part': [measures.loc['back_neck_plain']['sum'].item()],
                      'armhole_height': [measures.loc['bust']['measures'].item() / 6 + 5 + 1.5 +
-                                        measures.loc['armscye_lowing']['sum'].item()]}
+                                        measures.loc['armscye_lowing']['sum'].item()+const]}
 
-        const = measures.loc['ribber'][
-            'sum'] if 'ribber' in measures.index else 0
-        back_meas['armhole_depth'] = [
-            max(back_meas['waist'][0], back_meas['hips'][0], back_meas['bust'][0]) - back_meas['neck_width'][0] - (
-                    (back_meas['shoulder_width'][0] - const) * 2) / 2]
+        back_meas['armhole_depth'] = [(back_meas['bust'][0] - back_meas['neck_width'][0] - back_meas['shoulder_width'][0] * 2) / 2]
         back_meas['armhole_starts_at'] = [
             back_meas['TBL'][0] - back_meas['armhole_height'][0] + back_meas['neck_depth'][0]]
         back_meas['width'] = [max(back_meas['waist'][0], back_meas['hips'][0], back_meas['bust'][0])]
@@ -120,9 +118,11 @@ class Back:
         return back
 
     def bottom(self, stitches_size):
-        sts_to_decrease = self.main_measures_set.loc['width']['units_to_knit'].item() // 4 + 1
+        half = self.main_measures_set.loc['width']['units_to_knit'].item() // 4
+        sts_to_decrease = half + 1
         length = int(TankTop.round_to_base(TankTop.rows_sts(1, 'row', stitches_size), 2) / 2)
-        sts_per_row = curved_line(sts_to_decrease, length)
+        sts_per_row = pd.DataFrame([half] + curved_line(sts_to_decrease, length), index=[i * 2 for i in range(3)],
+                                   columns=['bottom']).rename_axis(index='counter')
         return sts_per_row
 
     def waist(self):
@@ -181,21 +181,64 @@ class Back:
         return side_line
 
     def armhole(self):
+
         one_fourth = self.main_measures_set.loc['armhole_depth']['units_to_knit'].item() // 4
+        # print(f'{one_fourth=}')
+        one_time_decrease = int(one_fourth + self.main_measures_set.loc['armhole_depth']['units_to_knit'].item() % 4)
+        # print(f'{one_time_decrease=}')
+        armhole = pd.DataFrame([one_time_decrease], index=[0], columns=['armhole'])
+        # print(armhole)
+        for sts in (2,1,0.9):
+            curv = curved_line(one_fourth, int(one_fourth // round(sts)))
+            len_armhole = len(armhole)
+            # print(f'{sts=}')
+            # print(f'{len_armhole=}')
+            # print(f'{curv=}')
+            if sts >= 1:
+                mult = 2
+            else:
+                mult = 3
+            part = pd.DataFrame(curv, index=[armhole.index[-1]+mult + i * mult for i in range(len(curv))])
+            # part = pd.DataFrame(curv, index=[i * mult for i in range(len_armhole +mult, len(armhole) +mult + len(curv))])
+            # print(f'{part}')
+
+            armhole = pd.concat([armhole, part], axis=1)
+            # print(armhole)
+        armhole = pd.DataFrame({'armhole':armhole.sum(axis=1).rename(index={0:'one_time_dec'})})
+
+        # print(armhole)
 
         # PART 1
-        one_time_decrease = int(one_fourth + self.main_measures_set.loc['armhole_depth']['units_to_knit'].item() % 4)
+        # sts = 3
+        #
+        # part1 = curved_line(one_fourth, int(one_fourth // sts))
+        #
+        # # PART 2
+        # sts = 2
+        #
+        # part2 = curved_line(one_fourth, int(one_fourth // sts))
+        #
+        # # # PART 3
+        # sts = 1
+        # part3 = curved_line(one_fourth, int(one_fourth // sts))
+        # armhole1 = pd.DataFrame.from_dict({'one_time_decrease': [one_time_decrease], 'three_sts_each_two_rows': [part1],
+        #                                    'two_sts_each_two_rows': [part2], 'st_each_four_rows': [part3]}).rename(
+        #     index={0: 'armhole'})
 
-        # PART 2
-        step = 2
-        part2 = curved_line(one_fourth, int(one_fourth // step))
+        # return part1
+        return armhole
 
-
-        # PART 3
-        step = 1
-        part3 = concave_line(one_fourth, int(one_fourth // step))
-
-        return one_time_decrease, part2, part3
+    def neck(self):
+        plain_part = self.main_measures_set.loc['plain_part']['units_to_knit'].item() / 2
+        neck_curve = (self.main_measures_set.loc['neck_width']['units_to_knit'].item() / 2) - plain_part
+        one_fourth = (neck_curve // 4)
+        one_time_decrease = one_fourth + neck_curve % 4
+        number_of_decs = int((self.main_measures_set.loc['neck_depth']['units_to_knit'].item() - 2) // 2)
+        neck_line = curved_line(
+            self.main_measures_set.loc['neck_width']['units_to_knit'].item() // 2 - one_time_decrease, number_of_decs)
+        neck_line = pd.DataFrame([plain_part] + neck_line, dtype=int, index=[i * 2 for i in range(len(neck_line) + 1)],
+                                 columns=['neck']).rename_axis(index=['counter'])
+        return neck_line
 
 # class Front:
 #
@@ -272,3 +315,25 @@ class Back:
 #
 #     def dart(self):
 #         pass
+
+# def armhole(self):
+#
+#     one_fourth = self.main_measures_set.loc['armhole_depth']['units_to_knit'].item() // 4
+#     one_time_decrease = int(one_fourth + self.main_measures_set.loc['armhole_depth']['units_to_knit'].item() % 4)
+#
+#     # PART 1
+#     sts = 3
+#     part1 = curved_line(one_fourth, int(one_fourth // sts))
+#
+#     # PART 2
+#     sts = 2
+#     part2 = curved_line(one_fourth, int(one_fourth // sts))
+#
+#     # PART 3
+#     sts = 1
+#     part3 = curved_line(one_fourth, int(one_fourth // sts))
+#     armhole = pd.DataFrame.from_dict({'one_time_decrease': [one_time_decrease], 'three_sts_each_two_rows': [part1],
+#                                       'two_sts_each_two_rows': [part2], 'st_each_four_rows': [part3]}).rename(
+#         index={0: 'armhole'})
+#
+#     return armhole

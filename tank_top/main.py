@@ -33,8 +33,9 @@ def main():
     # print(tank_top.back.main_measures_set)
     # print(tank_top.back.fitted)
     # print(tank_top.back.side_line.T)
-    # print(f'{tank_top.back.bottom=}')
-    # print(f'{tank_top.back.armhole=}')
+    # print(f'{tank_top.back.bottom}')
+    # print(f'{tank_top.back.armhole}')
+    # print(f'{tank_top.back.neck}')
 
 
 if __name__ == '__main__':

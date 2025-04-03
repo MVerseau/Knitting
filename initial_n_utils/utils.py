@@ -40,11 +40,11 @@ def curved_line(sts_to_dec, number_of_rows): #выгнутая линия _/``` 
     sts_per_row = [a + b for a, b in zip(sts_per_row, sts_to_add)]
     return sts_per_row
 
-def concave_line(sts_to_dec, number_of_rows):#вогнутая линия ___/` например, горловина спинки. Когда сначала маленькие убавки, потом быстрые
-    base_sts = int(sts_to_dec // number_of_rows)
-    sts_remainder = int(sts_to_dec % number_of_rows)
-    sts_per_row = [base_sts] * number_of_rows
-    sts_to_add = [0] * (number_of_rows - sts_remainder)+[1] * sts_remainder
+def concave_line(sts_to_dec, number_of_decs):#вогнутая линия ___/` например, горловина спинки. Когда сначала маленькие убавки, потом быстрые
+    base_sts = int(sts_to_dec // number_of_decs)
+    sts_remainder = int(sts_to_dec % number_of_decs)
+    sts_per_row = [base_sts] * number_of_decs
+    sts_to_add = [0] * (number_of_decs - sts_remainder) + [1] * sts_remainder
     sts_per_row = [a + b for a, b in zip(sts_per_row, sts_to_add)]
     return sts_per_row
 # print(tention_math('1**', 1))
