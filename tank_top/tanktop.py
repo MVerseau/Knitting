@@ -27,17 +27,14 @@ class TankTop:
 
         if isinstance(stitch, str):
             stitch = stitches_size[stitch].index
-        # print(stitches_size)
         return number * stitches_size.iloc[stitch][sts_or_row[row_or_sts]]
 
     def mes_and_adj_preparation(self, args):
         '''Сводит все мерки и моделирование в один DataFrame, подсчитывает суммы по строкам'''
-        # print(f'{args=}')
         garment_measurements, garment_adjustments, garment_design = args
         mes_adj = pd.concat([garment_measurements.join(garment_adjustments), garment_design]).rename(
             columns={0: 'design'})
         mes_adj['sum'] = mes_adj.sum(axis=1)
-        # print(f'{mes_adj=}')
         return mes_adj
 
     @staticmethod
@@ -57,7 +54,7 @@ class Back:
         self.main_measures_set = self.back_main_set(measures, stitches_size)
         self.fitted = self.fitted()
         self.waist = self.waist()
-        self.side_line = self.side_line() if measures.loc['fitted']['sum'].item() < 1 else self.fitted
+        self.side_line = self.side_line()
         self.bottom = self.bottom(stitches_size)
         self.armhole = self.armhole()
         self.neck = self.neck()
