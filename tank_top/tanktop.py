@@ -188,9 +188,9 @@ class Back:
                                          range(lower_sts_to_decrease)], columns=['fitted_waist'], dtype=int)
 
         waist = lower_row_remainder + upper_row_remainder if (
-                                                                         lower_row_remainder + upper_row_remainder) != 0 else upper_decrease_every_row // 2
+                                                                     lower_row_remainder + upper_row_remainder) != 0 else upper_decrease_every_row // 2
         upper = upper_decrease_every_row if (
-                                                        lower_row_remainder + upper_row_remainder) != 0 else upper_decrease_every_row - waist
+                                                    lower_row_remainder + upper_row_remainder) != 0 else upper_decrease_every_row - waist
 
         upper_curv = pd.DataFrame([1] * upper_sts_to_decrease,
                                   index=[lower_curv.index[
@@ -210,11 +210,13 @@ class Back:
         sts_to_decrease = int((self.main_measures_set.loc['hips']['units_to_knit'] -
                                self.main_measures_set.loc['bust']['units_to_knit']) / 2)
         decrease_every_row = int(lenght // sts_to_decrease)
-        row_remainder = int(lenght % sts_to_decrease)+int(decrease_every_row//2+decrease_every_row%2)
-        side_line = pd.DataFrame([self.fitted.loc['lower']['direct_part']+decrease_every_row//2], index=['direct_at_start'],
+        row_remainder = int(lenght % sts_to_decrease) + int(decrease_every_row // 2 + decrease_every_row % 2)
+        side_line = pd.DataFrame([self.fitted.loc['lower']['direct_part'] + decrease_every_row // 2],
+                                 index=['direct_at_start'],
                                  columns=['not_fitted'], dtype=int)
         curv = pd.DataFrame([1] * sts_to_decrease,
-                            index=[int(self.fitted.loc['lower']['direct_part']) + int(i * decrease_every_row) +int(decrease_every_row//2) for i
+                            index=[int(self.fitted.loc['lower']['direct_part']) + int(i * decrease_every_row) + int(
+                                decrease_every_row // 2) for i
                                    in range(sts_to_decrease)], columns=['not_fitted'], dtype=int)
         direct_at_end = pd.DataFrame([row_remainder], index=['direct_at_end'], columns=['not_fitted'], dtype=int)
         side_line = pd.concat([side_line, curv, direct_at_end], axis=0).rename_axis(index=['counter'])
@@ -232,11 +234,13 @@ class Back:
                 mult = 2
             else:
                 mult = 3
-            part = pd.DataFrame(curv, index=[armhole.index[-1] + mult + i * mult for i in range(len(curv))],columns=['armhole'])
+            part = pd.DataFrame(curv, index=[armhole.index[-1] + mult + i * mult for i in range(len(curv))],
+                                columns=['armhole'])
             armhole = pd.concat([armhole, part], axis=0)
 
         armhole = pd.concat(
-            [armhole, pd.DataFrame([armhole['armhole'].sum()], index=['total sts'], columns=['armhole'])], axis=0).rename_axis(index=['counter'])
+            [armhole, pd.DataFrame([armhole['armhole'].sum()], index=['total sts'], columns=['armhole'])],
+            axis=0).rename_axis(index=['counter'])
 
         # print(armhole)
 
