@@ -8,6 +8,8 @@ measures_vocab = {'waist': 'ОТ', 'hips': "ОБ", 'bust': "ОГ", 'back_length_
                   'front_neck_plain': "Ровная часть горловины переда",
                   'back_neck_lowing': "Углубление выреза горловин по спинке",
                   'front_neck_lowing': "Углубление выреза горловин по переду",
+                  'lower_bust': "ОГ нижний",
+                  'bust_weight': "ВГ",
                   'ribber': 'Ширина резинки'}
 
 adjustments_vocab = {'waist': 'прибавка к ОТ', 'hips': 'прибавка к ОБ', 'bust': 'прибавка к ОГ',
@@ -15,4 +17,4 @@ adjustments_vocab = {'waist': 'прибавка к ОТ', 'hips': 'прибав�
 stitches_size_approach = [' в спокойном состоянии: ', ', растянутый вдоль: ', ', растянутый поперек: ']
 sts_or_row = {'row': 'rows in sm', 'sts': 'sts in sm'}
 # convert_to_sts_or_rows={'sts':['width','armhole_depth','neck_width','shoulder_width','plain_part'],'row':['garment_length','back_length_till_waist','hem','ribber', 'armhole_height', 'shoulder_height', 'neck_depth']}
-convert_to_sts=['bust','waist','hips','armhole_depth','neck_width','shoulder_width','plain_part','width']
+convert_to_sts=['bust','waist','hips','armhole_depth','neck_width','shoulder_width','front_plain_part','back_plain_part','width','bust_separation', 'dart_length']

@@ -37,6 +37,10 @@ def main():
     # print(f'{tank_top.back.bottom}')
     # print(f'{tank_top.back.armhole}')
     # print(f'{tank_top.back.neck}')
+    print(tank_top.front.main_measures_set)
+    # print(tank_top.front.neck)
+    print(tank_top.front.dart)
+    # print(tank_top.front.dart[::-1])
 
 
 if __name__ == '__main__':
