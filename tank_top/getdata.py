@@ -55,7 +55,7 @@ def get_measurements(name):  # зачем DataFrames?
 
     if garment_measurements is None:
         garment_measurements = {}
-        for k in Owner.measurements:
+        for k in TankTop.measurements:
             garment_measurements[k] = [check_float(input(f'{measures_vocab[k]}: '))]
             if k in TankTop.adjustments:
                 garment_adjustments[k] = [check_float(input(f'{adjustments_vocab[k]}: '))]
@@ -65,8 +65,8 @@ def get_measurements(name):  # зачем DataFrames?
     else:
         for k in TankTop.adjustments:
             garment_adjustments[k] = [check_float(input(f'{adjustments_vocab[k]}: '))]
-            if k=='neck':
-                garment_adjustments[k]=garment_adjustments[k]*2
+            if k == 'neck':
+                garment_adjustments[k] = garment_adjustments[k] * 2
     garment_adjustments = pd.DataFrame.from_dict(garment_adjustments, orient='index').rename(
         columns={0: 'adjustments'})
     garment_measurements.to_csv(name.title() + '.csv', sep=';', index=True, encoding='utf-8')
