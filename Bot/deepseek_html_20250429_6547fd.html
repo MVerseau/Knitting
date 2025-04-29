@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор вязания</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2b5876;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        .measurement-group {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор вязания</h1>
+        
+        <div class="section">
+            <h2>Основные параметры</h2>
+            
+            <label for="item-type">Тип изделия:</label>
+            <select id="item-type" onchange="updateMeasurementFields()">
+                <option value="sweater">Свитер</option>
+                <option value="hat">Шапка</option>
+                <option value="scarf">Шарф</option>
+                <option value="socks">Носки</option>
+            </select>
+            
+            <label for="yarn-type">Тип пряжи:</label>
+            <input type="text" id="yarn-type" placeholder="Например: шерсть 100г/200м">
+            
+            <label for="needle-size">Размер спиц/крючка:</label>
+            <input type="text" id="needle-size" placeholder="Например: спицы №3">
+            
+            <label for="gauge">Плотность вязания (петель на 10 см):</label>
+            <input type="number" id="gauge" value="20">
+        </div>
+        
+        <div class="section">
+            <h2>Мерки</h2>
+            <div id="measurement-fields">
+                <!-- Динамически обновляемые поля -->
+                <div id="sweater-measurements" class="measurement-group active">
+                    <label for="chest">Обхват груди (см):</label>
+                    <input type="number" id="chest">
+                    
+                    <label for="length">Длина изделия (см):</label>
+                    <input type="number" id="length">
+                    
+                    <label for="sleeve">Длина рукава (см):</label>
+                    <input type="number" id="sleeve">
+                    
+                    <label for="neck">Обхват шеи (см):</label>
+                    <input type="number" id="neck">
+                </div>
+                
+                <div id="hat-measurements" class="measurement-group">
+                    <label for="head">Обхват головы (см):</label>
+                    <input type="number" id="head">
+                    
+                    <label for="hat-height">Высота шапки (см):</label>
+                    <input type="number" id="hat-height">
+                </div>
+                
+                <div id="scarf-measurements" class="measurement-group">
+                    <label for="width">Ширина шарфа (см):</label>
+                    <input type="number" id="width">
+                    
+                    <label for="scarf-length">Длина шарфа (см):</label>
+                    <input type="number" id="scarf-length">
+                </div>
+                
+                <div id="socks-measurements" class="measurement-group">
+                    <label for="foot">Длина стопы (см):</label>
+                    <input type="number" id="foot">
+                    
+                    <label for="leg">Обхват голени (см):</label>
+                    <input type="number" id="leg">
+                    
+                    <label for="sock-height">Высота носка (см):</label>
+                    <input type="number" id="sock-height">
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="calculatePattern()">Рассчитать</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+        
+        // Обновление полей мерок при изменении типа изделия
+        function updateMeasurementFields() {
+            const itemType = document.getElementById('item-type').value;
+            const groups = document.querySelectorAll('.measurement-group');
+            
+            groups.forEach(group => {
+                group.classList.remove('active');
+                if (group.id === `${itemType}-measurements`) {
+                    group.classList.add('active');
+                }
+            });
+        }
+        
+        // Расчет описания вязания
+        function calculatePattern() {
+            const itemType = document.getElementById('item-type').value;
+            const yarnType = document.getElementById('yarn-type').value;
+            const needleSize = document.getElementById('needle-size').value;
+            const gauge = parseInt(document.getElementById('gauge').value);
+            
+            let patternText = '<h3>Описание вязания</h3>';
+            patternText += `<p><strong>Пряжа:</strong> ${yarnType}</p>`;
+            patternText += `<p><strong>Инструмент:</strong> ${needleSize}</p>`;
+            patternText += `<p><strong>Плотность:</strong> ${gauge} п./10 см</p>`;
+            patternText += '<hr>';
+            
+            try {
+                if (itemType === 'sweater') {
+                    const chest = parseInt(document.getElementById('chest').value);
+                    const length = parseInt(document.getElementById('length').value);
+                    const sleeve = parseInt(document.getElementById('sleeve').value);
+                    const neck = parseInt(document.getElementById('neck').value);
+                    
+                    const chestSt = Math.round(chest * gauge / 10);
+                    const neckSt = Math.round(neck * gauge / 10);
+                    
+                    patternText += `<p>Свитер с окружностью груди ${chest} см, длиной ${length} см и длиной рукава ${sleeve} см.</p>`;
+                    patternText += `<ol>
+                        <li>Наберите ${chestSt} петель и вяжите резинкой 2x2 5 см.</li>
+                        <li>Перейдите на основной узор и вяжите прямо ${length - 5} см.</li>
+                        <li>Для горловины закройте центральные ${neckSt} петель.</li>
+                        <li>Рукава: наберите ${Math.round(sleeve * gauge / 10 * 0.8)} петель.</li>
+                    </ol>`;
+                }
+                // Аналогично для других типов изделий...
+                
+                patternText += '<p><em>Примечание: это базовое описание. Возможно, потребуется адаптация.</em></p>';
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = patternText;
+                resultDiv.style.display = 'block';
+                
+                // Прокрутка к результату
+                resultDiv.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (e) {
+                alert('Пожалуйста, заполните все поля корректно!');
+            }
+        }
+        
+        // Отправка данных в Telegram
+        function sendDataToTelegram() {
+            const data = {
+                yarnType: document.getElementById('yarn-type').value,
+                needleSize: document.getElementById('needle-size').value,
+                gauge: document.getElementById('gauge').value,
+                itemType: document.getElementById('item-type').value,
+                // Добавьте другие данные по мере необходимости
+            };
+            
+            Telegram.WebApp.sendData(JSON.stringify(data));
+        }
+    </script>
+</body>
+</html>

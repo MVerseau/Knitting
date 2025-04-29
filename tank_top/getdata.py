@@ -81,7 +81,7 @@ def set_stitches_size() -> pd.DataFrame:
     stitches_size = pd.DataFrame(columns=['sts in sm', 'rows in sm'])
     # print(stitches_size)
     for st in TankTop.main_stitch:
-        tension = input('Плотность (для 2 фонтур указать черзе "/": ')
+        tension = input('Плотность (для 2 фонтур указать черзе "/": ') #TODO: реализовать плотность для 2 фонтур
         stitches = int(input("Количество петель: "))
         rows = int(input("Количество рядов: "))
         sm_in_stitches = 0

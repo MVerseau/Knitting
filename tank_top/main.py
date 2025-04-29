@@ -10,6 +10,7 @@ import pandas as pd
 from getdata import get_measurements, get_stitches_size
 # from tank_top_person import Owner
 from tanktop import TankTop
+from technique import technique
 
 
 def main():
@@ -24,7 +25,7 @@ def main():
     if measures is None:
         measures = get_measurements(name) #->tuple
 
-    stitches_size = get_stitches_size(name)
+    stitches_size = get_stitches_size(name) #->pd.DataFrame
     # print(len(measures))
     tank_top = TankTop(name, stitches_size, measures)
     # print(tank_top.measurements_adjustments)
@@ -34,6 +35,7 @@ def main():
     # print(tank_top.back.fitted)
     # print(tank_top.back.waist)
     # print(tank_top.back.side_line)
+    # print(tank_top.stitches_size)
     # print(f'{tank_top.back.bottom}')
     # print(f'{tank_top.back.armhole}')
     # print(f'{tank_top.back.neck}')
@@ -41,6 +43,7 @@ def main():
     # print(tank_top.front.armhole)
     # print(tank_top.front.neck)
     # print(tank_top.front.dart)
+    technique(tank_top)
 
 
 

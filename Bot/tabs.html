@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Майка</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        
+        h1, h2 {
+            color: #444;
+        }
+        
+        .container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .yarn {
+            flex: 1;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .measurements {
+            flex: 1;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stitches_size {
+            flex: 1;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+<!--        .instructions {-->
+<!--            flex: 2;-->
+<!--        }-->
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+<!--            font-weight: bold;-->
+        }
+        
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        /* Стили для вкладок */
+        .tabs {
+            display: flex;
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            background-color: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+            overflow: hidden;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: none;
+            flex: 1;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background-color: #ddd;
+        }
+        
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            background: white;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .instructions-text {
+            white-space: pre-line;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Майка</h1>
+<!--    # Получить данные о необходимых мерках из класса Tanktop и словаря-->
+    <div class="container">
+        <div class="measurements">
+            <h2>Введите мерки (в см):</h2>
+                <div class="form-group">
+                    <label>Обхват талии</label>
+                    <div class="container">
+                        <div class="form-group">
+                            <label for="waist-measure">ОТ:</label>
+                            <input type="number" id="waist-measure" placeholder="Например, 100">
+                        </div>
+                        <div class="form-group">
+                            <label for="waist-adjustment">Прибавка:</label>
+                            <input type="number" id="waist-adjustment" placeholder="Например, 15">
+                        </div>
+                    </div>
+                </div>
+            
+            <div class="form-group">
+                <label for="hips">Обхват бёдер:</label>
+                <input type="number" id="hips" placeholder="Например, 100">
+            </div>
+            
+            <div class="form-group">
+                <label for="bust">Обхват груди:</label>
+                <input type="number" id="bust" placeholder="Например, 100">
+            </div>
+            
+            <div class="form-group">
+                <label for="back_length_till_waist">Длина изделия до талии:</label>
+                <input type="number" id="back_length_till_waist" placeholder="Например, 35">
+            </div>
+            
+            <div class="form-group">
+                <label for="TBL">Длина изделия:</label>
+                <input type="number" id="TBL" placeholder="Например, 60">
+            </div>
+
+            <div class="form-group">
+                <label for="neck">Обхват шеи:</label>
+                <input type="number" id="neck" placeholder="Например, 25">
+            </div>
+
+            <button id="calculate-btn">Расcчитать</button>
+        </div>
+        
+        <div class="container">
+            <div class="yarn">
+                <div class ="form-group">
+                <h2>Описание пряжи:</h2>
+                    <div class ="form-group">
+                            <input type="text" id="yarn">
+                    </div>
+            </div>
+                <h2>Введите петельную пробу:</h2>
+                    <div class="container">
+                        <div class="form-group">
+                            <label for="stitch_type">Переплетение:</label>
+                            <input type="text" id="stitch_type" placeholder="Кулирная гладь">
+                        </div>
+                        <div class="form-group">
+                            <label for="tention">Плотность:</label>
+                            <input type="text" id="tention" placeholder="Например, 3**">
+                        </div>
+                        <div class="form-group">
+                            <label>см:</label>
+                            <input type="text" id="rows_sm" placeholder="Например, 10">
+                            <input type="text" id="sts_sm" placeholder="Например, 10">
+                        </div>
+                        <div class="form-group">
+                            <label>количество:</label>
+                            <input type="number" id="rows" placeholder="Например, 10">
+                            <input type="number" id="sts" placeholder="Например, 10">
+                        </div>
+                    </div>
+                <h2>Уход</h2>
+                <div class="form-group">
+                    <div class="container">
+                        <div class="form-group">
+                            <label>Стирка:</label>
+                            <label>Сушка:</label>
+                            <label>ВТО:</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text">
+                            <input type="text">
+                            <input type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--        <div class="instructions">-->
+<!--            <h2>Инструкция по вязанию:</h2>-->
+
+<!--            <ul class="tabs">-->
+<!--                <li class="tab active" data-tab="back">Спинка</li>-->
+<!--                <li class="tab" data-tab="front">Перед</li>-->
+<!--                <li class="tab" data-tab="sleeve">Рукав</li>-->
+<!--                <li class="tab" data-tab="assembly">Сборка</li>-->
+<!--            </ul>-->
+
+<!--            <div class="tab-content active" id="back">-->
+<!--                <div class="instructions-text" id="back-instructions">-->
+<!--                    Введите ваши мерки и нажмите "Рассчитать", чтобы получить инструкции для вязания спинки.-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="tab-content" id="front">-->
+<!--                <div class="instructions-text" id="front-instructions">-->
+<!--                    Введите ваши мерки и нажмите "Рассчитать", чтобы получить инструкции для вязания переда.-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="tab-content" id="sleeve">-->
+<!--                <div class="instructions-text" id="sleeve-instructions">-->
+<!--                    Введите ваши мерки и нажмите "Рассчитать", чтобы получить инструкции для вязания рукава.-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="tab-content" id="assembly">-->
+<!--                <div class="instructions-text" id="assembly-instructions">-->
+<!--                    Введите ваши мерки и нажмите "Рассчитать", чтобы получить инструкции по сборке изделия.-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Переключение вкладок
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Расчет инструкций по меркам
+            document.getElementById('calculate-btn').addEventListener('click', function() {
+                const height = parseInt(document.getElementById('height').value) || 0;
+                const chest = parseInt(document.getElementById('chest').value) || 0;
+                const waist = parseInt(document.getElementById('waist').value) || 0;
+                const hips = parseInt(document.getElementById('hips').value) || 0;
+                const armLength = parseInt(document.getElementById('arm-length').value) || 0;
+                
+                // Генерация инструкций (здесь можно добавить реальные расчеты)
+                document.getElementById('back-instructions').textContent = generateBackInstructions(height, chest, waist, hips);
+                document.getElementById('front-instructions').textContent = generateFrontInstructions(height, chest, waist, hips);
+                document.getElementById('sleeve-instructions').textContent = generateSleeveInstructions(armLength, chest);
+                document.getElementById('assembly-instructions').textContent = generateAssemblyInstructions();
+            });
+            
+            // Функции генерации инструкций (заглушки - можно заменить реальными расчетами)
+            function generateBackInstructions(height, chest, waist, hips) {
+                return `Инструкция по вязанию спинки:
+                
+Размеры:
+- Рост: ${height} см
+- Обхват груди: ${chest} см
+- Обхват талии: ${waist} см
+- Обхват бедер: ${hips} см
+
+1. Наберите ${Math.round(chest * 0.9)} петель.
+2. Вяжите резинку 2x2 высотой 5 см.
+3. Перейдите на основной узор и вяжите прямо до проймы (примерно ${Math.round(height * 0.4)} см от начала).
+4. Для проймы закройте с каждой стороны по ${Math.round(chest * 0.05)} петель.
+5. Продолжайте вязать прямо до плеч.`;
+            }
+            
+            function generateFrontInstructions(height, chest, waist, hips) {
+                return `Инструкция по вязанию переда:
+                
+Размеры:
+- Рост: ${height} см
+- Обхват груди: ${chest} см
+- Обхват талии: ${waist} см
+- Обхват бедер: ${hips} см
+
+1. Наберите ${Math.round(chest * 0.9)} петель.
+2. Вяжите резинку 2x2 высотой 5 см.
+3. Перейдите на основной узор.
+4. Через ${Math.round(height * 0.3)} см начинайте формировать вырез горловины.
+5. Для проймы закройте с каждой стороны по ${Math.round(chest * 0.05)} петель.`;
+            }
+            
+            function generateSleeveInstructions(armLength, chest) {
+                return `Инструкция по вязанию рукава:
+                
+Размеры:
+- Длина рукава: ${armLength} см
+- Обхват груди: ${chest} см
+
+1. Наберите ${Math.round(chest * 0.3)} петель.
+2. Вяжите резинку 2x2 высотой 5 см.
+3. Перейдите на основной узор, равномерно прибавляя петли.
+4. В высшей точке должно быть ${Math.round(chest * 0.4)} петель.
+5. Закройте окат рукава, убавляя петли с обеих сторон.`;
+            }
+            
+            function generateAssemblyInstructions() {
+                return `Инструкция по сборке:
+                
+1. Сшейте плечевые швы.
+2. Втачайте рукава в проймы.
+3. Сшейте боковые швы и швы рукавов.
+4. Обработайте горловину и низ изделия.
+5. При необходимости пришейте пуговицы или сделайте застежку.`;
+            }
+        });
+    </script>
+</body>
+</html>
